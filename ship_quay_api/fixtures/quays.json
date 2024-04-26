@@ -1,0 +1,26 @@
+[
+    {
+        "model": "ship_quay_api.quay",
+        "pk": 1,
+        "fields": {
+            "name": "Quay 1",
+            "quay_type": "General",
+            "capacity": 5,
+            "length_m": 200,
+            "draft_m": 10,
+            "tools": ["cargo handling"]
+        }
+    },
+    {
+        "model": "ship_quay_api.quay",
+        "pk": 2,
+        "fields": {
+            "name": "Quay 2",
+            "quay_type": "Passenger",
+            "capacity": 3,
+            "length_m": 150,
+            "draft_m": 8,
+            "tools": ["passenger transport", "cargo handling"]
+        }
+    }
+]
