@@ -2,22 +2,20 @@ import datetime
 import random
 import time
 
-# Quay class representing a quay at the port
 class Quay:
     def __init__(self, name, quay_type, capacity, length_m, draft_m, tools):
         self.name = name
         self.quay_type = quay_type  # "Passenger", "Tanker", or "General"
-        self.capacity = capacity  # Maximum ships that can be accommodated
-        self.length_m = length_m  # Quay length in meters
-        self.draft_m = draft_m  # Quay draft in meters
+        self.capacity = capacity  
+        self.length_m = length_m  
+        self.draft_m = draft_m  
         self.tools = tools  # Tools available at the quay (e.g., passenger transport, oil handling, cargo handling)
-        self.occupied_by = []  # List of ships currently at this quay
+        self.occupied_by = [] 
 
     def is_free(self):
         return len(self.occupied_by) < self.capacity
 
     def can_accommodate(self, ship):
-        # Check if the quay can accommodate the ship based on length, draft, and tools
         has_correct_dimensions = self.length_m >= ship.length_m and self.draft_m >= ship.draft_m
         has_required_tools = all(tool in self.tools for tool in ship.required_tools)
         return has_correct_dimensions and has_required_tools
@@ -34,17 +32,16 @@ class Quay:
             self.occupied_by.remove(ship)
 
 
-# Ship class representing a ship arriving at the port
 class Ship:
     def __init__(self, name, ship_type, size, length_m, draft_m, arrival_time, departure_time, required_tools):
         self.name = name
-        self.ship_type = ship_type  # "Passenger", "Tanker", or "Cargo"
-        self.size = size  # Represents tonnage or other metric
-        self.length_m = length_m  # Ship length in meters
-        self.draft_m = draft_m  # Ship draft in meters
+        self.ship_type = ship_type 
+        self.size = size 
+        self.length_m = length_m
+        self.draft_m = draft_m 
         self.arrival_time = arrival_time
         self.departure_time = arrival_time + datetime.timedelta(hours=random.randint(4, 12))
-        self.required_tools = required_tools  # Tools required by the ship
+        self.required_tools = required_tools 
         self.assigned_quay = None
     
     def get_details(self):
@@ -60,13 +57,12 @@ class Ship:
         )
 
 
-# PortScheduler class for managing ship scheduling
+
 class PortScheduler:
     def __init__(self, quays):
-        self.quays = quays  # List of all quays at the port
+        self.quays = quays 
 
     def find_suitable_quays(self, ship):
-        # Find all suitable quays for the given ship and rank them by preference
         suitable_quays = [
             quay for quay in self.quays if quay.can_accommodate(ship) and quay.is_free()
         ]
@@ -74,7 +70,6 @@ class PortScheduler:
         return suitable_quays
 
     def reassign_cargo_from_priority_quays(self):
-        # Reassign Cargo ships from Passenger or Tanker quays to General quays if needed
         cargo_in_priority_quays = [
             ship
             for quay in self.quays
@@ -84,7 +79,6 @@ class PortScheduler:
         ]
 
         for cargo_ship in cargo_in_priority_quays:
-            # Find a suitable General quay for reassignment
             suitable_quays = [
                 quay for quay in self.quays if quay.quay_type == "General" and quay.is_free()
             ]
@@ -97,7 +91,6 @@ class PortScheduler:
                 best_quay.assign_ship(cargo_ship)
                 print(f"Reassigned {cargo_ship.name} to {best_quay.name}")
 
-# Simulation setup with quays and ships
 quays = [
     Quay("Passenger Quay", "Passenger", 1, 200, 10, ["passenger transport", "cargo handling"]),
     Quay("Tanker Quay 1", "Tanker", 1, 150, 12, ["oil handling", "cargo handling"]),
@@ -109,19 +102,18 @@ quays = [
 
 scheduler = PortScheduler(quays)
 
-# Pre-assign some ships to simulate a more realistic start
+
 pre_assigned_ships = [
     Ship("Pre-assigned Passenger 1", "Passenger", 10000, 150, 8, datetime.datetime.now(), datetime.datetime.now() + datetime.timedelta(hours=6), ["passenger transport"]),
     Ship("Pre-assigned Tanker 1", "Tanker", 15000, 140, 11, datetime.datetime.now(), datetime.datetime.now() + datetime.timedelta(hours=7), ["oil handling"]),
     Ship("Pre-assigned Cargo 1", "Cargo", 12000, 160, 9, datetime.datetime.now(), datetime.datetime.now() + datetime.timedelta(hours=5), ["cargo handling"]),
 ]
 
-# Assign these pre-assigned ships to their quays
-quays[0].assign_ship(pre_assigned_ships[0])  # Passenger Quay
-quays[1].assign_ship(pre_assigned_ships[1])  # Tanker Quay 1
-quays[6].assign_ship(pre_assigned_ships[2])  # General Quay 1
+quays[0].assign_ship(pre_assigned_ships[0])
+quays[1].assign_ship(pre_assigned_ships[1])  
+quays[6].assign_ship(pre_assigned_ships[2])  
 
-# Print initial occupied quays and their ships
+
 for quay in quays:
     if quay.occupied_by:
         print(f"{quay.name} is occupied by:")
