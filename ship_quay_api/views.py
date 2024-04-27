@@ -92,33 +92,33 @@ def find_suitable_quay(request, ship_id):
                         if general_quay:
                             cargo.quay = general_quay
                             cargo.save()
-'''
-                        if not suitable_quays:  # Reassign cargo ships to free up a quay
-                for quay in quays:
-                    if quay.quay_type in ["Passenger", "Tanker"]:
-                        cargo_to_reassign = [
-                            cargo for cargo in quay.ships.all()
-                            if cargo.ship_type == "Cargo"
-                        ]
-                        for cargo in cargo_to_reassign:
-                            general_quay = next(
-                                (q for q in quays if q.quay_type == "General" and q.is_free()),
-                                None
-                            )
-                            if general_quay:
-                                # Reassign the cargo ship to a general quay
-                                cargo.quay = general_quay
-                                cargo.save()
-
-                # Retry finding a suitable quay after reassignment
-                suitable_quays = [
-                    quay for quay in quays
-                    if quay.quay_type == ship.ship_type
-                    and quay.is_free()
-                    and quay.length_m >= ship.length_m
-                    and quay.draft_m >= ship.draft_m
-                ]
-'''
+###
+#                        if not suitable_quays:  # Reassign cargo ships to free up a quay
+#                for quay in quays:
+#                    if quay.quay_type in ["Passenger", "Tanker"]:
+#                        cargo_to_reassign = [
+#                            cargo for cargo in quay.ships.all()
+#                            if cargo.ship_type == "Cargo"
+#                        ]
+#                        for cargo in cargo_to_reassign:
+#                            general_quay = next(
+#                                (q for q in quays if q.quay_type == "General" and q.is_free()),
+#                                None
+#                            )
+#                            if general_quay:
+#                                # Reassign the cargo ship to a general quay
+#                                cargo.quay = general_quay
+#                                cargo.save()
+#
+#                # Retry finding a suitable quay after reassignment
+#                suitable_quays = [
+#                    quay for quay in quays
+#                    if quay.quay_type == ship.ship_type
+#                    and quay.is_free()
+#                    and quay.length_m >= ship.length_m
+#                    and quay.draft_m >= ship.draft_m
+#               ]
+#
 
         suitable_quays = [
             quay for quay in quays
