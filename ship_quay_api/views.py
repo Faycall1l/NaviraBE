@@ -40,13 +40,11 @@ def list_quays(request):
         )
         ships.append(ship)
 
-    # Find suitable quays for each ship without 'contains' lookup
     suitable_quays = []
     quays = Quay.objects.all()
 
     for ship in ships:
         for quay in quays:
-            # Check if the quay meets ship requirements
             if (
                 quay.capacity > 0  # Quay has capacity
                 and quay.length_m >= ship.length_m  # Length is sufficient
@@ -114,7 +112,7 @@ def find_suitable_quay(request, ship_id):
 
     if suitable_quays:
         best_quay = suitable_quays[0]
-        best_quay.ships.add(ship)  # Assign the ship to the quay
+        best_quay.ships.add(ship) 
         best_quay.save()
 
         quay_info = {
@@ -128,12 +126,10 @@ def find_suitable_quay(request, ship_id):
     else:
         return JsonResponse({"error": "No suitable quay found."}, status=404)
 
-# View to get the details of a ship by ID
 def get_ship_details(request, ship_id):
-    # Retrieve the ship object by ID or return 404 if not found
     ship = get_object_or_404(Ship, id=ship_id)
 
-    # Serialize the ship object to JSON
+
     ship_data = {
         "id": ship.id,
         "name": ship.name,
