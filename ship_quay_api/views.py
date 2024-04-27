@@ -7,9 +7,8 @@ from django.shortcuts import get_object_or_404
 from django.core import serializers
 
 
-# Example view to get a list of quays based on ships
 def list_quays(request):
-    # Create random ships for demonstration
+
     ships = []
     for i in range(10):  # Generate 10 random ships
         ship_name = f"Random Ship {random.randint(1, 1000)}"
@@ -18,7 +17,6 @@ def list_quays(request):
         ship_length = random.randint(120, 200)
         ship_draft = random.uniform(5.0, 12.0)
 
-        # Determine required tools based on ship type
         required_tools = {
             "Passenger": ["passenger transport", "cargo handling"],
             "Tanker": ["oil handling", "cargo handling"],
@@ -46,15 +44,14 @@ def list_quays(request):
     for ship in ships:
         for quay in quays:
             if (
-                quay.capacity > 0  # Quay has capacity
-                and quay.length_m >= ship.length_m  # Length is sufficient
-                and quay.draft_m >= ship.draft_m  # Draft is sufficient
-                and set(ship.required_tools).issubset(set(quay.tools))  # Required tools are available
+                quay.capacity > 0  
+                and quay.length_m >= ship.length_m  
+                and quay.draft_m >= ship.draft_m
+                and set(ship.required_tools).issubset(set(quay.tools))  
             ):
                 suitable_quays.append(quay)
-                break  # Exit loop once suitable quay is found
+                break 
 
-    # Return the suitable quays as a JSON response
     quay_list = [{"name": q.name, "type": q.quay_type, "capacity": q.capacity} for q in suitable_quays]
     return JsonResponse({"quays": quay_list})
 
@@ -63,7 +60,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from .models import Ship, Quay
 
-# View to find the most suitable quay for a given ship
+
 def find_suitable_quay(request, ship_id):
     ship = get_object_or_404(Ship, id=ship_id)
 
@@ -85,7 +82,6 @@ def find_suitable_quay(request, ship_id):
                 and quay.draft_m >= ship.draft_m
             ]
     else:
-        # Reassign Cargo ships if needed
         if ship.ship_type in ["Passenger", "Tanker"]:
             for quay in quays:
                 if quay.quay_type in ["Passenger", "Tanker"]:
