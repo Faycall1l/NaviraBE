@@ -92,6 +92,33 @@ def find_suitable_quay(request, ship_id):
                         if general_quay:
                             cargo.quay = general_quay
                             cargo.save()
+'''
+                        if not suitable_quays:  # Reassign cargo ships to free up a quay
+                for quay in quays:
+                    if quay.quay_type in ["Passenger", "Tanker"]:
+                        cargo_to_reassign = [
+                            cargo for cargo in quay.ships.all()
+                            if cargo.ship_type == "Cargo"
+                        ]
+                        for cargo in cargo_to_reassign:
+                            general_quay = next(
+                                (q for q in quays if q.quay_type == "General" and q.is_free()),
+                                None
+                            )
+                            if general_quay:
+                                # Reassign the cargo ship to a general quay
+                                cargo.quay = general_quay
+                                cargo.save()
+
+                # Retry finding a suitable quay after reassignment
+                suitable_quays = [
+                    quay for quay in quays
+                    if quay.quay_type == ship.ship_type
+                    and quay.is_free()
+                    and quay.length_m >= ship.length_m
+                    and quay.draft_m >= ship.draft_m
+                ]
+'''
 
         suitable_quays = [
             quay for quay in quays
@@ -134,77 +161,3 @@ def get_ship_details(request, ship_id):
     }
 
     return JsonResponse({"ship_details": ship_data})
-
-
-def find_new_quay(cargo_ship):
-    """
-    Find a suitable quay for a given cargo ship.
-    - Consider the ship's dimensions and other characteristics.
-    - Check that the quay can accommodate the ship.
-    - Ensure the quay is intended for cargo ships and is not occupied.
-    """
-    suitable_quays = Quay.objects.filter(
-        ship_type="cargo",
-        occupied_by__isnull=True, 
-        length__gte=cargo_ship.length,
-        width__gte=cargo_ship.width,
-        depth__gte=cargo_ship.draft,
-    )
-
-    # Return the first suitable quay if any exist
-    return suitable_quays.first()
-
-
-def reassign_cargo_ship(request, ship_id):
-    """
-    Reassign cargo ships when a passenger or tanker ship arrives
-    at a quay intended for them, but is currently occupied by a cargo ship.
-    """
-    ship = get_object_or_404(Ship, id=ship_id)
-
-    # Ensure the ship is either a passenger or a tanker
-    if ship.ship_type not in ["passenger", "tanker"]:
-        return JsonResponse(
-            {"error": "Only passenger or tanker ships can trigger reassignment."},
-            status=400,
-        )
-
-    occupied_quays = Quay.objects.filter(
-        occupied_by__isnull=False,
-        ship_type=ship.ship_type, 
-    )
-
-    for quay in occupied_quays:
-        if quay.occupied_by and quay.occupied_by.ship_type == "cargo":
-            cargo_ship = quay.occupied_by
-
-            new_quay = find_new_quay(cargo_ship)
-
-            if new_quay:
-                cargo_ship.quay = new_quay
-                cargo_ship.save()
-
-                quay.occupied_by = None
-                quay.save()
-
-                return JsonResponse(
-                    {
-                        "message": f"Cargo ship {cargo_ship.name} reassigned to quay {new_quay.name}",
-                        "new_quay": new_quay.name,
-                    },
-                    status=200,
-                )
-            else:
-                CargoQueue.objects.create(ship=cargo_ship)
-
-                return JsonResponse(
-                    {
-                        "message": f"No suitable quay found for {cargo_ship.name}. Added to queue.",
-                    },
-                    status=200,
-                )
-
-    return JsonResponse(
-        {"message": "No cargo ships found in passenger/tanker quays."},
-        status=200,
-    )
