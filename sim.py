@@ -120,19 +120,18 @@ for quay in quays:
         for ship in quay.occupied_by:
             print(f"  - {ship.name}")
 
-# Create additional ships for the simulation
-simulation_duration = 120  # Represents a week in real time
-ship_arrival_interval = 10  # A ship arrives every 10 seconds
+simulation_duration = 120 
+ship_arrival_interval = 10
 
 ships = []
 
-# Generate random ships with unique names, types, dimensions, and times
+
 for i in range(simulation_duration // ship_arrival_interval):
     ship_name = f"Random Ship {random.randint(1, 1000)}"
     ship_type = random.choice(["Passenger", "Tanker", "Cargo"])
-    ship_size = random.randint(5000, 20000)  # Random size in tonnage
-    ship_length = random.randint(120, 200)  # Random ship length in meters
-    ship_draft = random.uniform(5.0, 12.0)  # Ship draft in meters
+    ship_size = random.randint(5000, 20000)
+    ship_length = random.randint(120, 200)  
+    ship_draft = random.uniform(5.0, 12.0)
     required_tools = {
         "Passenger": ["passenger transport", "cargo handling"],
         "Tanker": ["oil handling", "cargo handling"],
@@ -155,11 +154,11 @@ for i in range(simulation_duration // ship_arrival_interval):
 
     ships.append(ship)
 
-# Display details of all randomly generated ships
+
 for ship in ships:
     print(ship.get_details())
 
-# Simulate ship arrivals and assign suitable quays
+
 simulation_start = datetime.datetime.now()
 simulation_end = simulation_start + datetime.timedelta(seconds=simulation_duration)
 
@@ -168,21 +167,18 @@ while datetime.datetime.now() < simulation_end:
         if ship.arrival_time <= datetime.datetime.now() and not ship.assigned_quay:
             suitable_quays = scheduler.find_suitable_quays(ship)
             if ship.ship_type == "Cargo":
-                # Do not assign to Passenger or Tanker quays unless General quays are filled or not suitable
                 suitable_quays = [q for q in suitable_quays if q.quay_type == "General"] or suitable_quays
             if suitable_quays:
                 best_quay = suitable_quays[0]
                 best_quay.assign_ship(ship)
                 print(f"{ship.name} assigned to {suitable_quays[0].name}")
 
-    time.sleep(10)  # Pause between ship arrivals
+    time.sleep(10) 
 
-    # Handle ship departures and reassignments due to priority
     for quay in scheduler.quays:
         for ship in quay.occupied_by[:]:
             if ship.departure_time <= datetime.datetime.now():
                 quay.remove_ship(ship)
                 print(f"{ship.name} left {quay.name}")
 
-    # Reassign Cargo ships from Passenger or Tanker quays if needed
     scheduler.reassign_cargo_from_priority_quays()
