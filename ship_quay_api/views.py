@@ -3,6 +3,9 @@ from django.shortcuts import render
 from datetime import datetime, timedelta
 import random
 from .models import Quay, Ship
+from django.shortcuts import get_object_or_404
+from django.core import serializers
+
 
 # Example view to get a list of quays based on ships
 def list_quays(request):
@@ -56,3 +59,91 @@ def list_quays(request):
     # Return the suitable quays as a JSON response
     quay_list = [{"name": q.name, "type": q.quay_type, "capacity": q.capacity} for q in suitable_quays]
     return JsonResponse({"quays": quay_list})
+
+
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from .models import Ship, Quay
+
+# View to find the most suitable quay for a given ship
+def find_suitable_quay(request, ship_id):
+    ship = get_object_or_404(Ship, id=ship_id)
+
+    quays = Quay.objects.all()
+
+    if ship.ship_type == "Cargo":
+        suitable_quays = [
+            quay for quay in quays
+            if quay.quay_type == "General"
+            and quay.is_free()
+            and quay.length_m >= ship.length_m
+            and quay.draft_m >= ship.draft_m
+        ]
+        if not suitable_quays:
+            suitable_quays = [
+                quay for quay in quays
+                if quay.is_free()
+                and quay.length_m >= ship.length_m
+                and quay.draft_m >= ship.draft_m
+            ]
+    else:
+        # Reassign Cargo ships if needed
+        if ship.ship_type in ["Passenger", "Tanker"]:
+            for quay in quays:
+                if quay.quay_type in ["Passenger", "Tanker"]:
+                    cargo_to_reassign = [
+                        cargo for cargo in quay.ships.all()
+                        if cargo.ship_type == "Cargo"
+                    ]
+                    for cargo in cargo_to_reassign:
+                        general_quay = next(
+                            (q for q in quays if q.quay_type == "General" and q.is_free()),
+                            None
+                        )
+                        if general_quay:
+                            cargo.quay = general_quay
+                            cargo.save()
+
+        suitable_quays = [
+            quay for quay in quays
+            if quay.quay_type == ship.ship_type
+            and quay.is_free()
+            and quay.length_m >= ship.length_m
+            and quay.draft_m >= ship.draft_m
+        ]
+
+    if suitable_quays:
+        best_quay = suitable_quays[0]
+        best_quay.ships.add(ship)  # Assign the ship to the quay
+        best_quay.save()
+
+        quay_info = {
+            "quay_name": best_quay.name,
+            "quay_type": best_quay.quay_type,
+            "length_m": best_quay.length_m,
+            "draft_m": best_quay.draft_m,
+            "tools": best_quay.tools,
+        }
+        return JsonResponse({"suitable_quay": quay_info})
+    else:
+        return JsonResponse({"error": "No suitable quay found."}, status=404)
+
+# View to get the details of a ship by ID
+def get_ship_details(request, ship_id):
+    # Retrieve the ship object by ID or return 404 if not found
+    ship = get_object_or_404(Ship, id=ship_id)
+
+    # Serialize the ship object to JSON
+    ship_data = {
+        "id": ship.id,
+        "name": ship.name,
+        "type": ship.ship_type,
+        "size": ship.size,
+        "length": ship.length_m,
+        "draft": ship.draft_m,
+        "arrival_time": ship.arrival_time,
+        "departure_time": ship.departure_time,
+        "required_tools": ship.required_tools,
+    }
+
+    return JsonResponse({"ship_details": ship_data})

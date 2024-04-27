@@ -1,0 +1,30 @@
+[
+    {
+        "model": "ship_quay_api.ship",
+        "pk": 1,
+        "fields": {
+            "name": "Ship A",
+            "ship_type": "Passenger",
+            "size": 10000,
+            "length_m": 150,
+            "draft_m": 8,
+            "arrival_time": "2024-04-26T14:00:00Z",
+            "departure_time": "2024-04-26T20:00:00Z",
+            "required_tools": ["passenger transport", "cargo handling"]
+        }
+    },
+    {
+        "model": "ship_quay_api.ship",
+        "pk": 2,
+        "fields": {
+            "name": "Ship B",
+            "ship_type": "Cargo",
+            "size": 12000,
+            "length_m": 180,
+            "draft_m": 10,
+            "arrival_time": "2024-04-26T14:30:00Z",
+            "departure_time": "2024-04-26T18:30:00Z",
+            "required_tools": ["cargo handling"]
+        }
+    }
+]
