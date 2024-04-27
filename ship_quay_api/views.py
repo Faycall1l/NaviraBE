@@ -56,11 +56,6 @@ def list_quays(request):
     return JsonResponse({"quays": quay_list})
 
 
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
-from .models import Ship, Quay
-
-
 def find_suitable_quay(request, ship_id):
     ship = get_object_or_404(Ship, id=ship_id)
 
