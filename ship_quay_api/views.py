@@ -118,7 +118,7 @@ def find_suitable_quay(request, ship_id):
 #                    and quay.length_m >= ship.length_m
 #                    and quay.draft_m >= ship.draft_m
 #               ]
-#
+###
 
         suitable_quays = [
             quay for quay in quays
